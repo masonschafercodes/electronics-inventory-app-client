@@ -1,24 +1,55 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from "react";
+
+import Navbar from "./components/Navbar";
+import People from "./components/People";
+import Stats from "./components/Stats";
+import Overview from "./components/Overview";
+
+import { GetData } from "./utils/getData";
 
 function App() {
+  const [userData, setUserData] = useState([]);
+  const [deviceData, setDeviceData] = useState([]);
+  const [noDevices, setNoDevices] = useState([]);
+
+  useEffect(() => {
+    GetData("http://localhost:9090/people")
+      .then((data) => {
+        setUserData(data);
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
+  useEffect(() => {
+    GetData("http://localhost:9090/items")
+      .then((data) => {
+        setDeviceData(data);
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
+  useEffect(() => {
+    GetData("http://localhost:9090/people-wo-items")
+      .then((data) => {
+        setNoDevices(data);
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="bg-gray-200 h-full">
+      <Navbar />
+      <div className="flex flex-wrap flex-col content-center">
+        <div className="flex">
+          <Overview
+            deviceCount={deviceData.length}
+            userCount={userData.length}
+            countOfNoDevices={noDevices.length}
+          />
+        </div>
+        <People nameList={userData.map((user) => user["first_name"])} />
+        <Stats />
+      </div>
     </div>
   );
 }
